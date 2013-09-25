@@ -1,0 +1,135 @@
+/*
+* Quad Infrared Detector Version 1.2
+* COPYRIGHT © 2013 S.D. "Hoffy" Hofmeister
+* http://www.hoffysworld.com
+* Provided under a Creative Commons Attribution, Non-Commercial Share Alike,3.0 Unported License
+* TARGETED TO MSP430 LANUCHPAD W/MSP430G2553 PROCESSOR
+*
+* Design Notes:
+*
+* This code is designed to control 4 IR Sensors and light 4 independent indicator LEDS to signal that an object as been detected.
+*
+* Distance between Tip ofEmitter and Tip of Detector has only been tested upto 3.5 Inches under incandescant and floroescant
+* lighting conditions with no failures.
+*
+* Circuit Pinout:
+* PIN 1.0 = Cathode of IR Receiver #1   > Anode to Ground
+* PIN 1.1 = UNASSIGNED - UART
+* PIN 1.2 = UNASSIGNED - UART
+* PIN 1.3 = Cathode of IR Receiver #2	> Anode to Ground
+* PIN 1.4 = Cathode of IR Receiver #3	> Anode to Ground
+* PIN 1.5 = Cathode of IR Receiver #4	> Anode to Ground
+* PIN 1.6 = Anode of Indicator LED #1 \
+* PIN 1.7 = Anode of Indicator LED #2  \  Cathodes to ground
+* PIN 2.0 = Anode of Indicator LED #3  /
+* PIN 2.1 = Anode of Indicator LED #4 /
+* PIN 2.2 = UNASSIGNED
+* PIN 2.3 = UNASSIGNED
+* PIN 2.4 = UNASSIGNED
+* PIN 2.5 = Circuit Power Indicator
+*
+* PINS 1.1, 1.2, 2.2, 2.3, 2.4 are left open for integration into other projects
+*
+* Note Anodes for the IR Emitters connect to VCC and Cathodes to Ground
+*/
+
+#include <msp430g2553.h>
+
+void main(void) {
+
+   WDTCTL = WDTPW + WDTHOLD;        // Stop watchdog timer
+
+
+   P2DIR |= BIT5;  //  Circuit Power Indicator
+   P2OUT |= BIT5;  //  Used to Trouble Shooting
+
+
+   //Configure IR Detectors
+
+   P1DIR &= ~BIT0;                  // Port 1 P1.0 (IR Detector #1) as input
+   P1REN |=  BIT0;                  // Enable Port 1 P1.0 (IR Detector #1) pull-up resistor
+   P1SEL &= ~BIT0;                  // Select Port 1 P1.0 (IR Detector #1)
+
+   P1DIR &= ~BIT3;                  // Port 1 P1.3 (IR Detector #2) as input
+   P1REN |=  BIT3;                  // Enable Port 1 P1.3 (IR Detector #2) pull-up resistor
+   P1SEL &= ~BIT3;                  // Select Port 1 P1.3 (IR Detector #2)
+
+   P1DIR &= ~BIT4;                  // Port 1 P1.4 (IR Detector #3) as input
+   P1REN |=  BIT4;                  // Enable Port 1 P1.4 (IR Detector #3) pull-up resistor
+   P1SEL &= ~BIT4;                  // Select Port 1 P1.4 (IR Detector #3)
+
+   P1DIR &= ~BIT5;                  // Port 1 P1.5 (IR Detector #4) as input
+   P1REN |=  BIT5;                  // Enable Port 1 P1.5 (IR Detector #4) pull-up resistor
+   P1SEL &= ~BIT5;                  // Select Port 1 P1.5 (IR Detector #4)
+
+   //Configure Outputs
+
+   P1DIR |= BIT6;					// Port 1 P1.6 (Indicator #1) as output
+   P1OUT &= ~BIT6;					// Port 1 P1.6 (Indicator #1) Set to off State
+
+   P1DIR |= BIT7;					// Port 1 P1.7 (Indicator #1) as output
+   P1OUT &= ~BIT7;					// Port 1 P1.7 (Indicator #1) Set to off State
+
+   P2DIR |= BIT0;					// Port 2 P2.0 (Indicator #1) as output
+   P2OUT &= ~BIT0;					// Port 1 P2.0 (Indicator #1) Set to off State
+
+
+   P2DIR |= BIT1;					// Port 2 P2.1 (Indicator #1) as output
+   P2OUT &= ~BIT1;					// Port 2 P2.1 (Indicator #1) Set to off State
+
+// Let's Get Down to Business
+
+  while( 1 ) // While this value remains equal to 1 the code will loop continuously, there is no code written to
+// change this state in this particular program.
+   {
+
+	   //Detector #1
+       if( (P1IN & BIT0) > 0)       // When IR Detector #1 detects an object breaking the IR Beam
+
+          P1OUT |= BIT6;            // Set LED Indicator #1 to ON
+
+                   else             // Otherwise
+
+          P1OUT &= ~BIT6;           // Set LED Indicator #1 to OFF
+       //END of Detector #1
+
+
+       //Detector #2
+       if( (P1IN & BIT3) > 0)      // When IR Detector #2 detects an object breaking the IR Beam
+
+                 P1OUT |= BIT7;            // Set LED Indicator #2 to ON
+
+                          else			   // Otherwise
+
+                 P1OUT &= ~BIT7;           // Set LED Indicator #2 to OFF
+       //END of Detector #2
+
+
+
+       //Detector #3
+       if( (P1IN & BIT4) > 0)      // When IR Detector #3 detects an object breaking the IR Beam
+
+                 P2OUT |= BIT0;            // Set LED Indicator #3 to ON
+
+                          else			   // Otherwise
+
+                 P2OUT &= ~BIT0;           // Set LED Indicator #3 to OFF
+       //END of Detector #3
+
+
+
+       //Detector #4
+       if( (P1IN & BIT5) > 0) 	    // When IR Detector #4 detects an object breaking the IR Beam
+
+                 P2OUT |= BIT1;            // Set LED Indicator #4 to ON
+
+                          else			   // Otherwise
+
+                 P2OUT &= ~BIT1;           // Set LED Indicator #4 to OFF
+       //End of Detector #4
+
+
+   } End of While
+
+}  // END OF MAIN
+
